@@ -1,0 +1,58 @@
+services:
+  event-service:
+    build: ./Event
+    ports:
+      - "9992:9992"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://localhost:27017/event_service
+
+  alert-service:
+    build: ./Alert
+    ports:
+      - "9994:9994"
+    depends_on:
+      - mongo
+
+  feedback-service:
+    build: ./Feedback
+    ports:
+      - "9995:9995"
+
+  reminder-service:
+    build: ./Reminder
+    ports:
+      - "9993:9993"
+
+  auth-service:
+    build: ./Auth-Service
+    ports:
+      - "9996:9996"
+
+  residents-service:
+    build: ./Resident
+    ports:
+      - "9991:9991"
+
+  api-gateway:
+    build: ./API-Gateway
+    ports:
+      - "9997:9997"
+    depends_on:
+      - event-service
+      - alert-service
+      - feedback-service
+      - reminder-service
+      - auth-service
+      - residents-service
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
