@@ -1,4 +1,13 @@
+version: "3.8"
+
 services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
   event-service:
     build: ./Event
     ports:
@@ -6,7 +15,7 @@ services:
     depends_on:
       - mongo
     environment:
-      - MONGO_URL=mongodb://localhost:27017/event_service
+      - MONGO_URL=mongodb://mongo:27017/event_service
 
   alert-service:
     build: ./Alert
@@ -14,26 +23,44 @@ services:
       - "9994:9994"
     depends_on:
       - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/Alert
 
   feedback-service:
     build: ./Feedback
     ports:
       - "9995:9995"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/feedback-db
 
   reminder-service:
     build: ./Reminder
     ports:
       - "9993:9993"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/reminderdb
 
   auth-service:
     build: ./Auth-Service
     ports:
       - "9996:9996"
+    depends_on:
+      - mongo
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/authdb
 
   residents-service:
     build: ./Resident
     ports:
       - "9991:9991"
+    depends_on:
+      - mongo
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/resident_microservice
 
   api-gateway:
     build: ./API-Gateway
@@ -46,13 +73,6 @@ services:
       - reminder-service
       - auth-service
       - residents-service
-
-  mongo:
-    image: mongo:7
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
 
 volumes:
   mongo-data:
